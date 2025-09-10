@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TapBook - Local Business Link-in-Bio</title>
+    <meta name="description" content="Simple link-in-bio solution for local service businesses">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Business Profile Header -->
+        <header class="business-header">
+            <div class="profile-image">
+                <img id="businessImage" src="https://via.placeholder.com/120x120/4F46E5/ffffff?text=Logo" alt="Business Logo">
+            </div>
+            <h1 id="businessName">Your Business Name</h1>
+            <p id="businessDescription">Professional services for your needs</p>
+            <div class="business-location">
+                <i class="fas fa-map-marker-alt"></i>
+                <span id="businessLocation">Your City, State</span>
+            </div>
+        </header>
+
+        <!-- Quick Contact Actions -->
+        <section class="quick-actions">
+            <a href="#" class="action-btn whatsapp-btn" id="whatsappBtn">
+                <i class="fab fa-whatsapp"></i>
+                <span>Chat on WhatsApp</span>
+            </a>
+            <a href="#" class="action-btn call-btn" id="callBtn">
+                <i class="fas fa-phone"></i>
+                <span>Call Now</span>
+            </a>
+        </section>
+
+        <!-- Services Section -->
+        <section class="services-section">
+            <h2>Our Services</h2>
+            <div class="services-grid" id="servicesGrid">
+                <!-- Services will be populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Hours Section -->
+        <section class="hours-section">
+            <h2>Business Hours</h2>
+            <div class="hours-grid" id="hoursGrid">
+                <!-- Hours will be populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Social Links -->
+        <section class="social-section">
+            <h2>Follow Us</h2>
+            <div class="social-links" id="socialLinks">
+                <!-- Social links will be populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Admin Panel (Hidden by default) -->
+        <div class="admin-panel" id="adminPanel" style="display: none;">
+            <h3>Customize Your Business</h3>
+            <form id="businessForm">
+                <div class="form-group">
+                    <label for="nameInput">Business Name:</label>
+                    <input type="text" id="nameInput" placeholder="Enter business name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="descriptionInput">Description:</label>
+                    <textarea id="descriptionInput" placeholder="Brief description of your business"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="locationInput">Location:</label>
+                    <input type="text" id="locationInput" placeholder="City, State">
+                </div>
+                
+                <div class="form-group">
+                    <label for="phoneInput">Phone Number:</label>
+                    <input type="tel" id="phoneInput" placeholder="+1234567890">
+                </div>
+                
+                <div class="form-group">
+                    <label for="whatsappInput">WhatsApp Number:</label>
+                    <input type="tel" id="whatsappInput" placeholder="+1234567890">
+                </div>
+                
+                <button type="submit">Update Business</button>
+            </form>
+        </div>
+
+        <!-- Edit Toggle Button -->
+        <button class="edit-toggle" id="editToggle">
+            <i class="fas fa-edit"></i>
+        </button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
