@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { Business } from '@/types';
 
@@ -177,12 +178,12 @@ export default function BusinessPage({ params }: BusinessPageProps) {
         <div className="text-center text-gray-500 text-sm">
           <p>Powered by <strong>TapBook</strong></p>
           {editToken && (
-            <button
-              onClick={copyEditLink}
-              className="mt-2 text-indigo-600 hover:text-indigo-700 underline"
+            <Link
+              href={`/${params.slug}/edit?token=${editToken}`}
+              className="mt-2 text-indigo-600 hover:text-indigo-700 underline inline-block"
             >
               Edit this page
-            </button>
+            </Link>
           )}
         </div>
       </div>
