@@ -1,10 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { validateWhatsApp, formatWhatsAppNumber } from '@/lib/utils';
-import { Business } from '@/types';
+import { THEME_PRESETS } from '@/lib/themes';
+import { Business, Theme, Profile, CustomLink, Layout } from '@/types';
+import ThemePicker from '@/components/editor/ThemePicker';
+import ColorPicker from '@/components/editor/ColorPicker';
+import ProfileEditor from '@/components/editor/ProfileEditor';
+import LinkManager from '@/components/editor/LinkManager';
+import ServiceEditor from '@/components/editor/ServiceEditor';
+import LivePreview from '@/components/editor/LivePreview';
+import { Save, Undo, Redo, Copy, Smartphone } from 'lucide-react';
 
 interface EditPageProps {
   params: { slug: string };
@@ -16,20 +24,53 @@ export default function EditPage({ params }: EditPageProps) {
   const token = searchParams.get('token');
 
   const [business, setBusiness] = useState<Business | null>(null);
-  const [formData, setFormData] = useState({
-    businessName: '',
-    whatsapp: '',
-    instagram: '',
-    services: [
-      { name: '', price: '' },
-      { name: '', price: '' },
-      { name: '', price: '' }
-    ]
-  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [autoSaving, setAutoSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [activeTab, setActiveTab] = useState<'theme' | 'profile' | 'links' | 'services'>('theme');
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+
+  // Auto-save functionality
+  const autoSave = useCallback(async (updatedBusiness: Business) => {
+    if (!token || !updatedBusiness) return;
+    
+    setAutoSaving(true);
+    try {
+      await supabase
+        .from('businesses')
+        .update({
+          name: updatedBusiness.name,
+          whatsapp: updatedBusiness.whatsapp,
+          instagram: updatedBusiness.instagram,
+          services: updatedBusiness.services,
+          theme: updatedBusiness.theme,
+          profile: updatedBusiness.profile,
+          links: updatedBusiness.links,
+          layout: updatedBusiness.layout
+        })
+        .eq('slug', params.slug)
+        .eq('edit_token', token);
+      
+      setLastSaved(new Date());
+    } catch (error) {
+      console.error('Auto-save failed:', error);
+    } finally {
+      setAutoSaving(false);
+    }
+  }, [params.slug, token]);
+
+  // Debounced auto-save
+  useEffect(() => {
+    if (!business || loading) return;
+    
+    const timeoutId = setTimeout(() => {
+      autoSave(business);
+    }, 3000); // Auto-save after 3 seconds of inactivity
+
+    return () => clearTimeout(timeoutId);
+  }, [business, autoSave, loading]);
 
   useEffect(() => {
     if (!token) {
@@ -55,18 +96,16 @@ export default function EditPage({ params }: EditPageProps) {
         return;
       }
 
-      setBusiness(data);
-      
-      // Populate form with existing data
-      setFormData({
-        businessName: data.name,
-        whatsapp: data.whatsapp,
-        instagram: data.instagram || '',
-        services: [
-          ...(data.services || []),
-          ...Array(Math.max(0, 3 - (data.services?.length || 0))).fill({ name: '', price: '' })
-        ].slice(0, 3)
-      });
+      // Ensure business has all required fields with defaults
+      const businessData: Business = {
+        ...data,
+        theme: data.theme || THEME_PRESETS.minimal,
+        profile: data.profile || { avatar: null, bio: null, coverImage: null },
+        links: data.links || [],
+        layout: data.layout || { showServices: true, servicesStyle: 'cards', linkOrder: [] }
+      };
+
+      setBusiness(businessData);
     } catch (err) {
       setError('Failed to load business data');
     } finally {
@@ -74,72 +113,60 @@ export default function EditPage({ params }: EditPageProps) {
     }
   };
 
-  const handleServiceChange = (index: number, field: 'name' | 'price', value: string) => {
-    const updatedServices = [...formData.services];
-    updatedServices[index][field] = value;
-    setFormData({ ...formData, services: updatedServices });
+  // Update handlers
+  const updateTheme = (theme: Theme) => {
+    if (!business) return;
+    setBusiness({ ...business, theme });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-    setSaving(true);
+  const updateProfile = (profile: Profile) => {
+    if (!business) return;
+    setBusiness({ ...business, profile });
+  };
 
-    try {
-      // Validation
-      if (!formData.businessName.trim()) {
-        throw new Error('Business name is required');
-      }
+  const updateBusinessName = (name: string) => {
+    if (!business) return;
+    setBusiness({ ...business, name });
+  };
 
-      if (!formData.whatsapp.trim()) {
-        throw new Error('WhatsApp number is required');
-      }
+  const updateLinks = (links: CustomLink[]) => {
+    if (!business) return;
+    setBusiness({ ...business, links });
+  };
 
-      if (!validateWhatsApp(formData.whatsapp)) {
-        throw new Error('Please enter a valid WhatsApp number');
-      }
+  const updateLayout = (layout: Layout) => {
+    if (!business) return;
+    setBusiness({ ...business, layout });
+  };
 
-      // Check if at least one service is provided
-      const validServices = formData.services.filter(service => 
-        service.name.trim() && service.price.trim()
-      );
+  const updateServices = (services: any[]) => {
+    if (!business) return;
+    setBusiness({ ...business, services });
+  };
 
-      if (validServices.length === 0) {
-        throw new Error('At least one service is required');
-      }
+  const updateWhatsApp = (whatsapp: string) => {
+    if (!business) return;
+    setBusiness({ ...business, whatsapp });
+  };
 
-      // Update database
-      const { error: updateError } = await supabase
-        .from('businesses')
-        .update({
-          name: formData.businessName.trim(),
-          whatsapp: formatWhatsAppNumber(formData.whatsapp),
-          instagram: formData.instagram.trim() || null,
-          services: validServices
-        })
-        .eq('slug', params.slug)
-        .eq('edit_token', token);
-
-      if (updateError) throw updateError;
-
-      setSuccess('Business updated successfully!');
-      setTimeout(() => {
-        router.push(`/${params.slug}`);
-      }, 2000);
-      
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setSaving(false);
-    }
+  const updateInstagram = (instagram: string) => {
+    if (!business) return;
+    setBusiness({ ...business, instagram: instagram || null });
   };
 
   const copyPublicLink = () => {
     const publicUrl = `${window.location.origin}/${params.slug}`;
     navigator.clipboard.writeText(publicUrl);
-    alert('Public page link copied to clipboard!');
+    setSuccess('Public page link copied to clipboard!');
+    setTimeout(() => setSuccess(''), 3000);
   };
+
+  const tabs = [
+    { id: 'theme', label: 'Theme', icon: '🎨' },
+    { id: 'profile', label: 'Profile', icon: '👤' },
+    { id: 'links', label: 'Links', icon: '🔗' },
+    { id: 'services', label: 'Services', icon: '💼' }
+  ] as const;
 
   if (loading) {
     return (
@@ -169,128 +196,253 @@ export default function EditPage({ params }: EditPageProps) {
     );
   }
 
+  if (!business) return null;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-md mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Edit Business</h1>
-            <p className="text-gray-600">Update your business information</p>
-            <button
-              onClick={copyPublicLink}
-              className="mt-2 text-indigo-600 hover:text-indigo-700 underline text-sm"
-            >
-              📋 Copy public page link
-            </button>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-1">
-                  Business Name *
-                </label>
-                <input
-                  type="text"
-                  id="businessName"
-                  value={formData.businessName}
-                  onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="Enter your business name"
-                  required
-                />
+    <div className="min-h-screen bg-slate-50">
+      {/* Clean Professional Header */}
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-semibold text-sm">T</span>
+                </div>
+                <div>
+                  <h1 className="text-lg font-semibold text-slate-900">TapBook</h1>
+                  <p className="text-xs text-slate-500 -mt-0.5">Link in Bio Editor</p>
+                </div>
               </div>
-
-              <div>
-                <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700 mb-1">
-                  WhatsApp Number *
-                </label>
-                <input
-                  type="tel"
-                  id="whatsapp"
-                  value={formData.whatsapp}
-                  onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="e.g., +1234567890"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="instagram" className="block text-sm font-medium text-gray-700 mb-1">
-                  Instagram Handle (optional)
-                </label>
-                <input
-                  type="text"
-                  id="instagram"
-                  value={formData.instagram}
-                  onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="@yourbusiness"
-                />
-              </div>
-
-              <div className="space-y-3">
-                <h3 className="text-lg font-medium text-gray-900">Services</h3>
-                <p className="text-sm text-gray-600">At least one service is required *</p>
+              
+              <div className="h-6 w-px bg-slate-200"></div>
+              
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-slate-700">{business.name}</span>
                 
-                {formData.services.map((service, index) => (
-                  <div key={index} className="grid grid-cols-2 gap-3">
-                    <input
-                      type="text"
-                      value={service.name}
-                      onChange={(e) => handleServiceChange(index, 'name', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      placeholder="Service name"
-                    />
-                    <input
-                      type="text"
-                      value={service.price}
-                      onChange={(e) => handleServiceChange(index, 'price', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      placeholder="$50"
-                    />
+                {autoSaving && (
+                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                    <div className="w-3 h-3 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin"></div>
+                    Saving...
                   </div>
-                ))}
+                )}
+                
+                {lastSaved && !autoSaving && (
+                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    Saved {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                )}
               </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <button
+                onClick={copyPublicLink}
+                className="flex items-center gap-2 px-3 py-2 text-sm text-slate-600 hover:text-slate-900 border border-slate-300 rounded-lg hover:border-slate-400 transition-colors"
+              >
+                <Copy className="w-4 h-4" />
+                Copy Link
+              </button>
+              
+              <a
+                href={`/${business.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors text-sm font-medium"
+              >
+                <Smartphone className="w-4 h-4" />
+                Preview
+              </a>
+            </div>
+          </div>
+        </div>
+      </header>
 
-              {error && (
-                <div className="text-red-600 text-sm bg-red-50 p-3 rounded-md">
-                  {error}
-                </div>
-              )}
+      {/* Success/Error Messages */}
+      {success && (
+        <div className="mx-6 lg:mx-8 mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 bg-emerald-100 rounded-full flex items-center justify-center">
+              <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full"></div>
+            </div>
+            <p className="text-emerald-800 font-medium text-sm">{success}</p>
+          </div>
+        </div>
+      )}
+      
+      {error && (
+        <div className="mx-6 lg:mx-8 mt-4 p-4 bg-red-50 border border-red-200 rounded-xl">
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 bg-red-100 rounded-full flex items-center justify-center">
+              <div className="w-2.5 h-2.5 bg-red-500 rounded-full"></div>
+            </div>
+            <p className="text-red-800 font-medium text-sm">{error}</p>
+          </div>
+        </div>
+      )}
 
-              {success && (
-                <div className="text-green-600 text-sm bg-green-50 p-3 rounded-md">
-                  {success}
-                </div>
-              )}
-
-              <div className="space-y-3">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                >
-                  {saving ? 'Saving...' : 'Update Business'}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => router.push(`/${params.slug}`)}
-                  className="w-full bg-gray-200 text-gray-800 py-3 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 font-medium"
-                >
-                  View Public Page
-                </button>
+      {/* Professional Row Layout */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+          
+          {/* Left Panel - Editor */}
+          <div>
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+              {/* Clean Tab Navigation */}
+              <div className="border-b border-slate-200">
+                <nav className="flex" aria-label="Tabs">
+                  {tabs.map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`${
+                        activeTab === tab.id
+                          ? 'border-slate-900 text-slate-900 bg-slate-50'
+                          : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                      } flex-1 py-4 px-6 text-sm font-medium border-b-2 transition-colors flex items-center justify-center gap-2`}
+                    >
+                      <span>{tab.icon}</span>
+                      <span>{tab.label}</span>
+                    </button>
+                  ))}
+                </nav>
               </div>
-            </form>
+              
+              {/* Tab Content */}
+              <div className="p-6">
+                {activeTab === 'theme' && (
+                  <div className="space-y-6">
+                    <ThemePicker 
+                      currentTheme={business.theme}
+                      onThemeChange={updateTheme}
+                    />
+                    
+                    <div className="grid grid-cols-1 gap-4">
+                      <ColorPicker
+                        label="Primary Color"
+                        color={business.theme.primaryColor}
+                        onChange={(color) => updateTheme({ ...business.theme, primaryColor: color })}
+                      />
+                      <ColorPicker
+                        label="Background Color"
+                        color={business.theme.backgroundColor}
+                        onChange={(color) => updateTheme({ ...business.theme, backgroundColor: color })}
+                      />
+                      <ColorPicker
+                        label="Text Color"
+                        color={business.theme.textColor}
+                        onChange={(color) => updateTheme({ ...business.theme, textColor: color })}
+                      />
+                    </div>
+                    
+                    {/* Font and Button Style Selectors */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Font</label>
+                        <select
+                          value={business.theme.font}
+                          onChange={(e) => updateTheme({ 
+                            ...business.theme, 
+                            font: e.target.value as Theme['font']
+                          })}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                        >
+                          <option value="inter">Inter</option>
+                          <option value="outfit">Outfit</option>
+                          <option value="space-mono">Space Mono</option>
+                          <option value="playfair">Playfair Display</option>
+                          <option value="caveat">Caveat</option>
+                        </select>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Button Style</label>
+                        <select
+                          value={business.theme.buttonStyle}
+                          onChange={(e) => updateTheme({ 
+                            ...business.theme, 
+                            buttonStyle: e.target.value as Theme['buttonStyle']
+                          })}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                        >
+                          <option value="rounded">Rounded</option>
+                          <option value="pill">Pill</option>
+                          <option value="square">Square</option>
+                          <option value="brutal">Brutal</option>
+                          <option value="ghost">Ghost</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {activeTab === 'profile' && (
+                  <div className="space-y-6">
+                    <ProfileEditor
+                      businessName={business.name}
+                      profile={business.profile}
+                      onNameChange={updateBusinessName}
+                      onProfileChange={updateProfile}
+                    />
+                    
+                    {/* WhatsApp and Instagram */}
+                    <div className="space-y-4">
+                      <div>
+                        <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700 mb-2">
+                          WhatsApp Number *
+                        </label>
+                        <input
+                          type="tel"
+                          id="whatsapp"
+                          value={business.whatsapp}
+                          onChange={(e) => updateWhatsApp(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          placeholder="+1234567890"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label htmlFor="instagram" className="block text-sm font-medium text-gray-700 mb-2">
+                          Instagram Handle (optional)
+                        </label>
+                        <input
+                          type="text"
+                          id="instagram"
+                          value={business.instagram || ''}
+                          onChange={(e) => updateInstagram(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          placeholder="@yourbusiness"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {activeTab === 'links' && (
+                  <LinkManager
+                    links={business.links}
+                    onLinksChange={updateLinks}
+                  />
+                )}
+                
+                {activeTab === 'services' && (
+                  <ServiceEditor
+                    services={business.services}
+                    layout={business.layout}
+                    onServicesChange={updateServices}
+                    onLayoutChange={updateLayout}
+                  />
+                )}
+              </div>
+            </div>
           </div>
 
-          <div className="text-center mt-6">
-            <p className="text-sm text-gray-500">
-              Keep this edit link safe • Share your public page with customers
-            </p>
+          {/* Right Panel - Live Preview */}
+          <div className="lg:sticky lg:top-24">
+            <LivePreview business={business} />
           </div>
+          
         </div>
       </div>
     </div>
