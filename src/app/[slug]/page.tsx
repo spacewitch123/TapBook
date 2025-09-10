@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { Business, CustomLink } from '@/types';
 import { getBackgroundStyle, getTextStyle, getButtonStyle, getFontClass, THEME_PRESETS } from '@/lib/themes';
@@ -383,13 +384,12 @@ export default function BusinessPage({ params }: BusinessPageProps) {
             Powered by <strong>TapBook</strong>
           </p>
           {editToken && (
-            <button
-              onClick={copyEditLink}
-              className="text-sm underline transition-colors duration-200 hover:opacity-80"
-              style={{ color: theme.primaryColor }}
+            <Link
+              href={`/${params.slug}/edit?token=${editToken}`}
+              className="mt-2 text-indigo-600 hover:text-indigo-700 underline inline-block"
             >
               Edit this page
-            </button>
+            </Link>
           )}
         </div>
       </div>

@@ -7,3 +7,4 @@ supabase-schema.sql
 .claude
 src/app/robots.txt
 src/app/sitemap.xml
+.env
