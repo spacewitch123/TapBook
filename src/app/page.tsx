@@ -159,16 +159,16 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-2 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-r from-indigo-600 to-blue-600 rounded-xl flex items-center justify-center">
                 <Sparkles className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">TapBook</h1>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">TapBook</h1>
             </div>
             <p className="text-xl text-gray-700 font-medium">Create your link in bio page</p>
             <p className="text-gray-500 mt-1">Get started in under 2 minutes • Free forever</p>
@@ -179,15 +179,15 @@ export default function HomePage() {
             {[1, 2, 3].map((step) => (
               <div key={step} className="flex items-center">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all duration-300 ${
-                  currentStep > step ? 'bg-green-500 text-white' :
-                  currentStep === step ? 'bg-blue-600 text-white ring-4 ring-blue-100' :
-                  'bg-gray-200 text-gray-500'
+                  currentStep > step ? 'bg-emerald-500 text-white shadow-lg' :
+                  currentStep === step ? 'bg-indigo-600 text-white ring-4 ring-indigo-100 shadow-lg' :
+                  'bg-slate-200 text-slate-500'
                 }`}>
                   {currentStep > step ? <Check className="w-5 h-5" /> : step}
                 </div>
                 {step < 3 && (
                   <div className={`w-16 h-1 mx-2 rounded-full transition-all duration-300 ${
-                    currentStep > step ? 'bg-green-500' : 'bg-gray-200'
+                    currentStep > step ? 'bg-emerald-500' : 'bg-slate-200'
                   }`} />
                 )}
               </div>
@@ -198,19 +198,19 @@ export default function HomePage() {
           <div className="flex justify-center mb-8">
             <div className="flex gap-8 text-sm">
               <span className={`text-center transition-colors ${
-                currentStep >= 1 ? 'text-blue-600 font-medium' : 'text-gray-400'
+                currentStep >= 1 ? 'text-indigo-600 font-medium' : 'text-slate-400'
               }`}>Basic Info</span>
               <span className={`text-center transition-colors ${
-                currentStep >= 2 ? 'text-blue-600 font-medium' : 'text-gray-400'
+                currentStep >= 2 ? 'text-indigo-600 font-medium' : 'text-slate-400'
               }`}>Social Platforms</span>
               <span className={`text-center transition-colors ${
-                currentStep >= 3 ? 'text-blue-600 font-medium' : 'text-gray-400'
+                currentStep >= 3 ? 'text-indigo-600 font-medium' : 'text-slate-400'
               }`}>Your Handles</span>
             </div>
           </div>
 
           {/* Step Content */}
-          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+          <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-white/20">
             {/* Step 1: Basic Info */}
             {currentStep === 1 && (
               <div className="space-y-6 animate-fadeIn">
@@ -229,7 +229,7 @@ export default function HomePage() {
                       type="text"
                       value={formData.businessName}
                       onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
+                      className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-lg bg-white/80"
                       placeholder="Your Business Name"
                     />
                   </div>
@@ -279,7 +279,7 @@ export default function HomePage() {
                     <textarea
                       value={formData.bio}
                       onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm resize-none"
+                      className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm resize-none bg-white/80"
                       placeholder="Tell people about your business..."
                       rows={3}
                       maxLength={150}
@@ -309,8 +309,8 @@ export default function HomePage() {
                         onClick={() => togglePlatform(platform.id)}
                         className={`p-4 rounded-xl border-2 transition-all duration-200 hover:scale-105 ${
                           isSelected
-                            ? 'border-blue-500 bg-blue-50 shadow-lg'
-                            : 'border-gray-200 hover:border-gray-300 bg-white'
+                            ? 'border-indigo-500 bg-indigo-50 shadow-lg'
+                            : 'border-slate-200 hover:border-slate-300 bg-white/80'
                         }`}
                       >
                         <div className="flex items-center gap-3">
@@ -320,7 +320,7 @@ export default function HomePage() {
                           <div className="text-left">
                             <div className="font-semibold text-gray-900">{platform.name}</div>
                             {isSelected && (
-                              <div className="text-xs text-blue-600 font-medium">✓ Selected</div>
+                              <div className="text-xs text-indigo-600 font-medium">✓ Selected</div>
                             )}
                           </div>
                         </div>
@@ -353,7 +353,7 @@ export default function HomePage() {
                       type="tel"
                       value={formData.whatsapp}
                       onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white/80"
                       placeholder="+1234567890"
                     />
                     <p className="text-xs text-gray-500 mt-1">This will be used for customer contact</p>
@@ -380,7 +380,7 @@ export default function HomePage() {
                           type="text"
                           value={formData.handles[platformId] || ''}
                           onChange={(e) => updateHandle(platformId, e.target.value)}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white/80"
                           placeholder={platform.placeholder}
                         />
                       </div>
@@ -420,7 +420,7 @@ export default function HomePage() {
               {currentStep < 3 ? (
                 <button
                   onClick={nextStep}
-                  className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl"
+                  className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-indigo-700 transition-colors shadow-lg hover:shadow-xl"
                 >
                   Next
                   <ArrowRight className="w-4 h-4" />
@@ -429,7 +429,7 @@ export default function HomePage() {
                 <button
                   onClick={handleSubmit}
                   disabled={loading}
-                  className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl font-medium hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-3 rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? (
                     <>

@@ -3,32 +3,32 @@ import { Theme } from '@/types';
 export const THEME_PRESETS: Record<string, Theme> = {
   modern: {
     style: 'minimal',
-    primaryColor: '#3b82f6',
+    primaryColor: '#6366f1',
     backgroundColor: '#ffffff',
-    textColor: '#1f2937',
+    textColor: '#1e293b',
     buttonStyle: 'rounded',
     font: 'inter'
   },
   midnight: {
     style: 'dark',
-    primaryColor: '#60a5fa',
+    primaryColor: '#818cf8',
     backgroundColor: '#0f172a',
-    textColor: '#f8fafc',
+    textColor: '#f1f5f9',
     buttonStyle: 'rounded',
     font: 'inter'
   },
   sunset: {
     style: 'gradient',
-    primaryColor: '#f97316',
-    backgroundColor: 'from-orange-400 via-red-500 to-pink-500',
+    primaryColor: '#f59e0b',
+    backgroundColor: 'from-amber-400 via-orange-500 to-rose-500',
     textColor: '#ffffff',
     buttonStyle: 'pill',
     font: 'outfit'
   },
   ocean: {
     style: 'gradient',
-    primaryColor: '#0ea5e9',
-    backgroundColor: 'from-cyan-400 via-blue-500 to-indigo-600',
+    primaryColor: '#0891b2',
+    backgroundColor: 'from-sky-400 via-cyan-500 to-blue-600',
     textColor: '#ffffff',
     buttonStyle: 'pill',
     font: 'inter'
@@ -36,16 +36,16 @@ export const THEME_PRESETS: Record<string, Theme> = {
   glass: {
     style: 'glass',
     primaryColor: '#8b5cf6',
-    backgroundColor: 'from-purple-400/30 via-pink-400/30 to-blue-400/30',
-    textColor: '#1f2937',
+    backgroundColor: 'from-violet-400/20 via-purple-400/20 to-indigo-400/20',
+    textColor: '#1e293b',
     buttonStyle: 'rounded',
     font: 'inter'
   },
   neon: {
     style: 'neon',
-    primaryColor: '#a78bfa',
-    backgroundColor: '#0c0a1a',
-    textColor: '#e4e4e7',
+    primaryColor: '#c084fc',
+    backgroundColor: '#0f0f23',
+    textColor: '#f1f5f9',
     buttonStyle: 'rounded',
     font: 'space-mono'
   },
