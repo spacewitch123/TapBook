@@ -26,12 +26,7 @@ import {
   Pen
 } from 'lucide-react';
 
-// Import our new advanced components
-import FilterStudio from './FilterStudio';
-import CustomCSSEditor from './CustomCSSEditor';
-import BackgroundStudio from './BackgroundStudio';
-import ShadowDesigner from './ShadowDesigner';
-import ParticleSystem from '../effects/ParticleSystem';
+// Simplified imports - removed complex components
 
 interface AdvancedThemeEditorProps {
   theme: Theme;
@@ -76,7 +71,7 @@ const COLOR_PALETTES = [
 ];
 
 export default function AdvancedThemeEditor({ theme, onThemeChange }: AdvancedThemeEditorProps) {
-  const [activeTab, setActiveTab] = useState<'colors' | 'typography' | 'layout' | 'effects' | 'filters' | 'backgrounds' | 'shadows' | 'particles' | 'css'>('colors');
+  const [activeTab, setActiveTab] = useState<'colors' | 'typography' | 'layout' | 'effects'>('colors');
   const [showColorPicker, setShowColorPicker] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
@@ -98,12 +93,7 @@ export default function AdvancedThemeEditor({ theme, onThemeChange }: AdvancedTh
     { id: 'colors', label: 'Colors', icon: Palette, description: 'Brand colors & palette' },
     { id: 'typography', label: 'Typography', icon: Type, description: 'Fonts & text styles' },
     { id: 'layout', label: 'Layout', icon: Layout, description: 'Structure & spacing' },
-    { id: 'effects', label: 'Effects', icon: Sparkles, description: 'Animations & backdrops' },
-    { id: 'filters', label: 'Filters', icon: Filter, description: 'CSS visual effects' },
-    { id: 'backgrounds', label: 'Patterns', icon: Grid, description: 'Background textures' },
-    { id: 'shadows', label: 'Shadows', icon: Layers, description: 'Shadow effects' },
-    { id: 'particles', label: 'Particles', icon: Sparkles, description: 'Particle effects' },
-    { id: 'css', label: 'Custom CSS', icon: Code, description: 'Raw CSS editing' }
+    { id: 'effects', label: 'Effects', icon: Sparkles, description: 'Simple animations' }
   ] as const;
 
   const generateRandomTheme = () => {
@@ -398,83 +388,6 @@ export default function AdvancedThemeEditor({ theme, onThemeChange }: AdvancedTh
           </div>
         )}
 
-        {activeTab === 'filters' && (
-          <FilterStudio
-            onFiltersChange={(filters) => {
-              // Handle filter changes here
-              console.log('Filters updated:', filters);
-            }}
-          />
-        )}
-
-        {activeTab === 'backgrounds' && (
-          <BackgroundStudio
-            onPatternChange={(pattern, options) => {
-              // Extract just the background value from the CSS
-              const backgroundValue = pattern
-                .replace(/background-image:\s*/g, '')
-                .replace(/background:\s*/g, '')
-                .replace(/opacity:.*?;/g, '')
-                .replace(/transform:.*?;/g, '')
-                .replace(/mix-blend-mode:.*?;/g, '')
-                .replace(/animation:.*?;/g, '')
-                .trim()
-                .replace(/;$/, '');
-              
-              updateTheme({ backgroundPattern: backgroundValue || null });
-            }}
-          />
-        )}
-
-        {activeTab === 'shadows' && (
-          <ShadowDesigner
-            onShadowChange={(shadow) => {
-              // Handle shadow changes here
-              updateTheme({ customShadow: shadow });
-            }}
-          />
-        )}
-
-        {activeTab === 'particles' && (
-          <div className="space-y-6">
-            <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <Sparkles className="w-4 h-4" />
-              Particle Effects
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              {['snow', 'stars', 'bubbles', 'geometric', 'fireflies', 'matrix'].map(type => (
-                <button
-                  key={type}
-                  onClick={() => updateTheme({ particleEffect: type })}
-                  className={`p-4 border-2 rounded-xl transition-all duration-300 ${
-                    theme.particleEffect === type
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <div className="text-sm font-medium capitalize">{type}</div>
-                </button>
-              ))}
-            </div>
-            <div className="bg-gray-100 p-4 rounded-xl relative overflow-hidden h-32">
-              <ParticleSystem 
-                type={theme.particleEffect as any || 'stars'}
-                intensity="medium"
-                enabled={!!theme.particleEffect}
-              />
-              <div className="absolute inset-0 flex items-center justify-center text-gray-600 font-medium">
-                Particle Preview
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'css' && (
-          <CustomCSSEditor
-            customCSS={theme.customCSS || ''}
-            onCSSChange={(css) => updateTheme({ customCSS: css })}
-          />
-        )}
       </div>
 
       {/* Backdrop overlay for color picker */}

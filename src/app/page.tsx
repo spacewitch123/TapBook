@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { generateUniqueSlug, generateEditToken, validateWhatsApp, formatWhatsAppNumber } from '@/lib/utils';
-import { THEME_PRESETS } from '@/lib/themes';
+import { THEME_PRESETS, BUSINESS_TYPES, getSmartDefaultTheme } from '@/lib/themes';
 import { Upload, ArrowRight, ArrowLeft, Check, Instagram, Facebook, Twitter, Youtube, Linkedin, Music, Globe, Sparkles } from 'lucide-react';
 
 const SOCIAL_PLATFORMS = [
@@ -22,6 +22,7 @@ export default function HomePage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     businessName: '',
+    businessType: '' as keyof typeof BUSINESS_TYPES | '',
     bio: '',
     avatar: null as string | null,
     whatsapp: '',
@@ -74,6 +75,10 @@ export default function HomePage() {
     if (currentStep === 1) {
       if (!formData.businessName.trim()) {
         setError('Business name is required');
+        return;
+      }
+      if (!formData.businessType) {
+        setError('Please select your business type');
         return;
       }
     }
@@ -129,7 +134,7 @@ export default function HomePage() {
           name: formData.businessName.trim(),
           whatsapp: formatWhatsAppNumber(formData.whatsapp),
           services: [], // Start with no services
-          theme: THEME_PRESETS.modern, // Default to modern theme
+          theme: getSmartDefaultTheme(formData.businessType || undefined), // Smart theme based on business type
           profile: {
             avatar: formData.avatar,
             bio: formData.bio.trim() || null
@@ -231,6 +236,44 @@ export default function HomePage() {
                       className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-lg bg-white/80"
                       placeholder="Your Business Name"
                     />
+                  </div>
+
+                  {/* Business Type Selection */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-3">
+                      What type of business is this? *
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {Object.entries(BUSINESS_TYPES).map(([key, businessType]) => (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => setFormData({ ...formData, businessType: key as keyof typeof BUSINESS_TYPES })}
+                          className={`p-4 rounded-xl border-2 transition-all duration-200 hover:scale-105 text-left ${
+                            formData.businessType === key
+                              ? 'border-indigo-500 bg-indigo-50 shadow-lg'
+                              : 'border-slate-200 hover:border-slate-300 bg-white/80'
+                          }`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="text-2xl">{businessType.icon}</div>
+                            <div>
+                              <h3 className="font-semibold text-gray-900 text-sm">{businessType.name}</h3>
+                              <p className="text-xs text-gray-500 mt-1">{businessType.description}</p>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                    {formData.businessType && (
+                      <div className="mt-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
+                        <p className="text-sm text-blue-700">
+                          <span className="font-medium">Perfect!</span> We'll set up your page with the{' '}
+                          <span className="font-semibold">{THEME_PRESETS[BUSINESS_TYPES[formData.businessType].recommendedTheme].style}</span> theme 
+                          that works great for {BUSINESS_TYPES[formData.businessType].name.toLowerCase()}.
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Profile Picture */}

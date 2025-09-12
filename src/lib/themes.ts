@@ -181,6 +181,68 @@ export function getComplementaryColor(hex: string): string {
   return `#${complementaryR.toString(16).padStart(2, '0')}${complementaryG.toString(16).padStart(2, '0')}${complementaryB.toString(16).padStart(2, '0')}`;
 }
 
+// Business types and their recommended themes
+export const BUSINESS_TYPES = {
+  'professional': {
+    name: 'Professional Services',
+    description: 'Lawyers, consultants, agencies, coaches',
+    icon: '💼',
+    recommendedTheme: 'modern'
+  },
+  'beauty': {
+    name: 'Beauty & Wellness',
+    description: 'Salons, spas, fitness, beauty services',
+    icon: '✨',
+    recommendedTheme: 'rose'
+  },
+  'food': {
+    name: 'Food & Dining',
+    description: 'Restaurants, cafes, food trucks, catering',
+    icon: '🍕',
+    recommendedTheme: 'forest'
+  },
+  'creative': {
+    name: 'Creative & Design',
+    description: 'Photographers, artists, designers, studios',
+    icon: '🎨',
+    recommendedTheme: 'glass'
+  },
+  'health': {
+    name: 'Health & Medical',
+    description: 'Doctors, clinics, health services, therapy',
+    icon: '⚕️',
+    recommendedTheme: 'midnight'
+  },
+  'services': {
+    name: 'Home & Local Services',
+    description: 'Contractors, cleaners, repairs, maintenance',
+    icon: '🔧',
+    recommendedTheme: 'ocean'
+  },
+  'tech': {
+    name: 'Tech & Digital',
+    description: 'Apps, software, tech services, IT',
+    icon: '💻',
+    recommendedTheme: 'neon'
+  },
+  'retail': {
+    name: 'Retail & Shopping',
+    description: 'Stores, boutiques, products, e-commerce',
+    icon: '🛍️',
+    recommendedTheme: 'sunset'
+  }
+} as const;
+
+// Get smart default theme based on business type
+export function getSmartDefaultTheme(businessType?: keyof typeof BUSINESS_TYPES): Theme {
+  if (!businessType || !BUSINESS_TYPES[businessType]) {
+    return THEME_PRESETS.modern; // Fallback to modern
+  }
+  
+  const recommendedTheme = BUSINESS_TYPES[businessType].recommendedTheme;
+  return THEME_PRESETS[recommendedTheme];
+}
+
 // Auto-enhance theme with complementary colors
 export function enhanceTheme(theme: Theme): Theme {
   const enhanced = { ...theme };
