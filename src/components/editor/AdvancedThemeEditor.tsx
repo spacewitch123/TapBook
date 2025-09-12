@@ -19,8 +19,19 @@ import {
   Sun,
   Moon,
   Contrast,
-  Shuffle
+  Shuffle,
+  Code,
+  Filter,
+  Grid,
+  Pen
 } from 'lucide-react';
+
+// Import our new advanced components
+import FilterStudio from './FilterStudio';
+import CustomCSSEditor from './CustomCSSEditor';
+import BackgroundStudio from './BackgroundStudio';
+import ShadowDesigner from './ShadowDesigner';
+import ParticleSystem from '../effects/ParticleSystem';
 
 interface AdvancedThemeEditorProps {
   theme: Theme;
@@ -65,7 +76,7 @@ const COLOR_PALETTES = [
 ];
 
 export default function AdvancedThemeEditor({ theme, onThemeChange }: AdvancedThemeEditorProps) {
-  const [activeTab, setActiveTab] = useState<'colors' | 'typography' | 'layout' | 'effects'>('colors');
+  const [activeTab, setActiveTab] = useState<'colors' | 'typography' | 'layout' | 'effects' | 'filters' | 'backgrounds' | 'shadows' | 'particles' | 'css'>('colors');
   const [showColorPicker, setShowColorPicker] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
@@ -87,7 +98,12 @@ export default function AdvancedThemeEditor({ theme, onThemeChange }: AdvancedTh
     { id: 'colors', label: 'Colors', icon: Palette, description: 'Brand colors & palette' },
     { id: 'typography', label: 'Typography', icon: Type, description: 'Fonts & text styles' },
     { id: 'layout', label: 'Layout', icon: Layout, description: 'Structure & spacing' },
-    { id: 'effects', label: 'Effects', icon: Sparkles, description: 'Animations & backdrops' }
+    { id: 'effects', label: 'Effects', icon: Sparkles, description: 'Animations & backdrops' },
+    { id: 'filters', label: 'Filters', icon: Filter, description: 'CSS visual effects' },
+    { id: 'backgrounds', label: 'Patterns', icon: Grid, description: 'Background textures' },
+    { id: 'shadows', label: 'Shadows', icon: Layers, description: 'Shadow effects' },
+    { id: 'particles', label: 'Particles', icon: Sparkles, description: 'Particle effects' },
+    { id: 'css', label: 'Custom CSS', icon: Code, description: 'Raw CSS editing' }
   ] as const;
 
   const generateRandomTheme = () => {
@@ -119,30 +135,36 @@ export default function AdvancedThemeEditor({ theme, onThemeChange }: AdvancedTh
         </button>
       </div>
 
-      {/* Enhanced Tab Navigation */}
+      {/* Enhanced Tab Navigation with Horizontal Scroll */}
       <div ref={tabsRef} className="relative">
-        <div className="flex space-x-1 bg-gray-100 p-1 rounded-xl">
-          {tabs.map((tab) => {
-            const IconComponent = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 ${
-                  activeTab === tab.id
-                    ? 'bg-white text-gray-900 shadow-md'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
-                }`}
-              >
-                <IconComponent className="w-4 h-4" />
-                <div className="text-left">
-                  <div className="font-semibold">{tab.label}</div>
-                  <div className="text-xs opacity-75 hidden sm:block">{tab.description}</div>
-                </div>
-              </button>
-            );
-          })}
+        <div className="bg-gray-100 p-1 rounded-xl overflow-hidden">
+          <div className="flex space-x-1 overflow-x-auto scrollbar-hide pb-1" style={{ scrollSnapType: 'x mandatory' }}>
+            {tabs.map((tab) => {
+              const IconComponent = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 whitespace-nowrap ${
+                    activeTab === tab.id
+                      ? 'bg-white text-gray-900 shadow-md'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+                  }`}
+                  style={{ scrollSnapAlign: 'start' }}
+                >
+                  <IconComponent className="w-4 h-4" />
+                  <div className="text-left">
+                    <div className="font-semibold">{tab.label}</div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
+        
+        {/* Gradient fade indicators for scroll */}
+        <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-gray-100 to-transparent pointer-events-none z-10" />
+        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-gray-100 to-transparent pointer-events-none z-10" />
       </div>
 
       {/* Tab Content */}
@@ -331,6 +353,7 @@ export default function AdvancedThemeEditor({ theme, onThemeChange }: AdvancedTh
                 <Layers className="w-4 h-4" />
                 Backdrop Effects
               </h3>
+              <p className="text-sm text-gray-500 mb-3">Apply glass/blur effects behind buttons and cards</p>
               <div className="grid grid-cols-2 gap-3">
                 {BACKDROP_STYLES.map((backdrop) => (
                   <button
@@ -374,6 +397,84 @@ export default function AdvancedThemeEditor({ theme, onThemeChange }: AdvancedTh
             </div>
           </div>
         )}
+
+        {activeTab === 'filters' && (
+          <FilterStudio
+            onFiltersChange={(filters) => {
+              // Handle filter changes here
+              console.log('Filters updated:', filters);
+            }}
+          />
+        )}
+
+        {activeTab === 'backgrounds' && (
+          <BackgroundStudio
+            onPatternChange={(pattern, options) => {
+              // Extract just the background value from the CSS
+              const backgroundValue = pattern
+                .replace(/background-image:\s*/g, '')
+                .replace(/background:\s*/g, '')
+                .replace(/opacity:.*?;/g, '')
+                .replace(/transform:.*?;/g, '')
+                .replace(/mix-blend-mode:.*?;/g, '')
+                .replace(/animation:.*?;/g, '')
+                .trim()
+                .replace(/;$/, '');
+              
+              updateTheme({ backgroundPattern: backgroundValue || null });
+            }}
+          />
+        )}
+
+        {activeTab === 'shadows' && (
+          <ShadowDesigner
+            onShadowChange={(shadow) => {
+              // Handle shadow changes here
+              updateTheme({ customShadow: shadow });
+            }}
+          />
+        )}
+
+        {activeTab === 'particles' && (
+          <div className="space-y-6">
+            <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+              <Sparkles className="w-4 h-4" />
+              Particle Effects
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              {['snow', 'stars', 'bubbles', 'geometric', 'fireflies', 'matrix'].map(type => (
+                <button
+                  key={type}
+                  onClick={() => updateTheme({ particleEffect: type })}
+                  className={`p-4 border-2 rounded-xl transition-all duration-300 ${
+                    theme.particleEffect === type
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="text-sm font-medium capitalize">{type}</div>
+                </button>
+              ))}
+            </div>
+            <div className="bg-gray-100 p-4 rounded-xl relative overflow-hidden h-32">
+              <ParticleSystem 
+                type={theme.particleEffect as any || 'stars'}
+                intensity="medium"
+                enabled={!!theme.particleEffect}
+              />
+              <div className="absolute inset-0 flex items-center justify-center text-gray-600 font-medium">
+                Particle Preview
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'css' && (
+          <CustomCSSEditor
+            customCSS={theme.customCSS || ''}
+            onCSSChange={(css) => updateTheme({ customCSS: css })}
+          />
+        )}
       </div>
 
       {/* Backdrop overlay for color picker */}
@@ -383,6 +484,17 @@ export default function AdvancedThemeEditor({ theme, onThemeChange }: AdvancedTh
           onClick={() => setShowColorPicker(null)}
         />
       )}
+
+      {/* Custom scrollbar hiding styles */}
+      <style jsx>{`
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </div>
   );
 }

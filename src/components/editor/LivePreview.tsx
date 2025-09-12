@@ -65,16 +65,6 @@ export default function LivePreview({ business }: LivePreviewProps) {
                     height: 'calc(100% - 3rem)'
                   }}
                 >
-                  {/* Cover Image */}
-                  {profile.coverImage && (
-                    <div className="relative h-24 overflow-hidden -mx-1">
-                      <img
-                        src={profile.coverImage}
-                        alt="Cover"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
 
                   <div className="px-3 pb-6">
                     {/* Profile Section */}

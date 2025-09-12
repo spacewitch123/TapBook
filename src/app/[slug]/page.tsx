@@ -38,8 +38,16 @@ export default function BusinessPage({ params }: BusinessPageProps) {
       // Ensure business has all required fields with defaults
       const businessData: Business = {
         ...data,
-        theme: data.theme || THEME_PRESETS.minimal,
-        profile: data.profile || { avatar: null, bio: null, coverImage: null },
+        theme: {
+          ...(data.theme || THEME_PRESETS.minimal),
+          // Load advanced features from separate columns
+          customCSS: data.custom_css || undefined,
+          backgroundPattern: data.background_pattern || undefined,
+          customShadow: data.custom_shadow || undefined,
+          particleEffect: data.particle_effect || undefined,
+          filters: data.filters || undefined
+        },
+        profile: data.profile || { avatar: null, bio: null },
         links: data.links || [],
         layout: data.layout || { showServices: true, servicesStyle: 'cards', linkOrder: [] }
       };
@@ -181,20 +189,6 @@ export default function BusinessPage({ params }: BusinessPageProps) {
       )}
 
       <div className="container mx-auto px-4 py-8 max-w-md">
-        {/* Cover Image */}
-        {profile.coverImage && (
-          <div className="relative -mx-4 mb-8 h-48 overflow-hidden animate-slideDown">
-            <img
-              src={profile.coverImage}
-              alt="Cover"
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-            {theme.style === 'glass' && (
-              <div className="absolute inset-0 backdrop-blur-sm bg-white/10" />
-            )}
-          </div>
-        )}
 
         {/* Profile Section */}
         <div className="text-center mb-8 animate-fadeIn" style={{ animationDelay: '0.2s' }}>

@@ -23,12 +23,27 @@ export interface Theme {
   backdropStyle?: string;
   animations?: boolean;
   hoverEffects?: boolean;
+  // New advanced features
+  customCSS?: string;
+  backgroundPattern?: string;
+  customShadow?: string;
+  particleEffect?: string;
+  filters?: {
+    blur: number;
+    brightness: number;
+    contrast: number;
+    saturate: number;
+    hueRotate: number;
+    grayscale: number;
+    sepia: number;
+    invert: number;
+    opacity: number;
+  };
 }
 
 export interface Profile {
   avatar?: string | null;
   bio?: string | null;
-  coverImage?: string | null;
 }
 
 export interface Layout {

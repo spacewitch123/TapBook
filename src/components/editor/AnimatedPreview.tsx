@@ -5,6 +5,8 @@ import { gsap } from 'gsap';
 import { Business } from '@/types';
 import { getBackgroundStyle, getTextStyle, getButtonStyle, getFontClass } from '@/lib/themes';
 import { ExternalLink, Phone, Mail, Instagram, Globe, Eye, Smartphone } from 'lucide-react';
+import ParticleSystem from '../effects/ParticleSystem';
+import ScrollAnimation from '../effects/ScrollAnimations';
 
 interface AnimatedPreviewProps {
   business: Business;
@@ -55,6 +57,22 @@ export default function AnimatedPreview({ business }: AnimatedPreviewProps) {
       repeat: 1,
       ease: "power2.inOut"
     });
+  };
+
+  const getBackdropFilter = (backdropStyle?: string) => {
+    switch (backdropStyle) {
+      case 'blur': return 'blur(10px)';
+      case 'glass': return 'blur(20px) saturate(1.8)';
+      case 'frosted': return 'blur(40px) saturate(1.2)';
+      case 'tinted': return 'blur(5px) brightness(0.8)';
+      case 'vibrant': return 'blur(15px) saturate(2) contrast(1.2)';
+      default: return undefined;
+    }
+  };
+
+  const getBackdropClass = (theme: any) => {
+    if (!theme.backdropStyle || theme.backdropStyle === 'none') return '';
+    return 'backdrop-blur';
   };
 
   return (
@@ -110,23 +128,41 @@ export default function AnimatedPreview({ business }: AnimatedPreviewProps) {
                 {/* Content */}
                 <div 
                   ref={contentRef}
-                  className={`h-full overflow-y-auto ${getBackgroundStyle(theme)} ${getFontClass(theme.font)}`}
+                  className={`h-full overflow-y-auto ${getBackgroundStyle(theme)} ${getFontClass(theme.font)} relative`}
                   style={{
                     backgroundColor: theme.style === 'minimal' ? theme.backgroundColor : undefined,
-                    height: 'calc(100% - 3rem)'
+                    height: 'calc(100% - 3rem)',
+                    filter: theme.filters ? `blur(${theme.filters.blur}px) brightness(${theme.filters.brightness}%) contrast(${theme.filters.contrast}%) saturate(${theme.filters.saturate}%) hue-rotate(${theme.filters.hueRotate}deg) grayscale(${theme.filters.grayscale}%) sepia(${theme.filters.sepia}%) invert(${theme.filters.invert}%) opacity(${theme.filters.opacity}%)` : undefined,
+                    boxShadow: theme.customShadow || undefined
                   }}
                 >
-                  {/* Cover Image */}
-                  {profile.coverImage && (
-                    <div className="relative h-24 overflow-hidden -mx-2 mb-4">
-                      <img
-                        src={profile.coverImage}
-                        alt="Cover"
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                    </div>
+                  {/* Particle System */}
+                  {theme.particleEffect && (
+                    <ParticleSystem 
+                      type={theme.particleEffect as any}
+                      intensity="low"
+                      enabled={true}
+                      className="absolute inset-0 z-0"
+                    />
                   )}
+                  
+                  {/* Background Pattern */}
+                  {theme.backgroundPattern && (
+                    <div 
+                      className="absolute inset-0 z-0" 
+                      style={{
+                        background: theme.backgroundPattern,
+                        opacity: 0.3,
+                        mixBlendMode: 'multiply'
+                      }}
+                    />
+                  )}
+                  
+                  {/* Custom CSS Injection */}
+                  {theme.customCSS && <style dangerouslySetInnerHTML={{ __html: theme.customCSS }} />}
+                  
+                  {/* Content wrapper with higher z-index */}
+                  <div className="relative z-10">
 
                   <div className="px-4 pb-8">
                     {/* Profile Section */}
@@ -141,20 +177,27 @@ export default function AnimatedPreview({ business }: AnimatedPreviewProps) {
                         </div>
                       )}
 
-                      <h1 
-                        className={`text-lg font-bold mb-2 ${getTextStyle(theme)}`}
-                        style={{ color: theme.textColor }}
-                      >
-                        {business.name}
-                      </h1>
+                      <ScrollAnimation animation="slideUp" delay={0.2}>
+                        <h1 
+                          className={`text-lg font-bold mb-2 ${getTextStyle(theme)}`}
+                          style={{ 
+                            color: theme.textColor,
+                            textShadow: theme.style === 'neon' ? `0 0 10px ${theme.primaryColor}` : undefined
+                          }}
+                        >
+                          {business.name}
+                        </h1>
+                      </ScrollAnimation>
 
                       {profile.bio && (
-                        <p 
-                          className={`text-xs opacity-75 mb-3 ${getTextStyle(theme)}`}
-                          style={{ color: theme.textColor }}
-                        >
-                          {profile.bio}
-                        </p>
+                        <ScrollAnimation animation="fadeIn" delay={0.4}>
+                          <p 
+                            className={`text-xs opacity-75 mb-3 ${getTextStyle(theme)}`}
+                            style={{ color: theme.textColor }}
+                          >
+                            {profile.bio}
+                          </p>
+                        </ScrollAnimation>
                       )}
 
                       {/* Animated divider */}
@@ -168,27 +211,30 @@ export default function AnimatedPreview({ business }: AnimatedPreviewProps) {
                     {links.filter(link => link.visible).length > 0 && (
                       <div className="space-y-2 mb-6">
                         {links.filter(link => link.visible).map((link, index) => (
-                          <button
-                            key={link.id}
-                            onClick={handleLinkClick}
-                            className={`w-full p-3 text-left transition-all duration-300 hover:scale-105 hover:shadow-lg ${getButtonStyle(theme)}`}
-                            style={{
-                              backgroundColor: theme.primaryColor,
-                              color: theme.style === 'neon' ? theme.textColor : 'white',
-                              animationDelay: `${index * 0.1}s`
-                            }}
-                          >
-                            <div className="flex items-center gap-2">
-                              <div className="w-4 h-4 flex items-center justify-center">
-                                {link.type === 'url' && <Globe className="w-3 h-3" />}
-                                {link.type === 'email' && <Mail className="w-3 h-3" />}
-                                {link.type === 'phone' && <Phone className="w-3 h-3" />}
-                                {link.type === 'social' && <Instagram className="w-3 h-3" />}
+                          <ScrollAnimation key={link.id} animation="slideLeft" delay={index * 0.1}>
+                            <button
+                              onClick={handleLinkClick}
+                              className={`w-full p-3 text-left transition-all duration-300 hover:scale-105 hover:shadow-lg ${getButtonStyle(theme)} ${getBackdropClass(theme)}`}
+                              style={{
+                                backgroundColor: theme.backdropStyle && theme.backdropStyle !== 'none' ? 'rgba(255, 255, 255, 0.1)' : theme.primaryColor,
+                                color: theme.style === 'neon' ? theme.textColor : 'white',
+                                boxShadow: theme.style === 'neon' ? `0 0 20px ${theme.primaryColor}40` : theme.customShadow || undefined,
+                                backdropFilter: getBackdropFilter(theme.backdropStyle),
+                                border: theme.backdropStyle === 'glass' ? '1px solid rgba(255, 255, 255, 0.2)' : undefined
+                              }}
+                            >
+                              <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 flex items-center justify-center">
+                                  {link.type === 'url' && <Globe className="w-3 h-3" />}
+                                  {link.type === 'email' && <Mail className="w-3 h-3" />}
+                                  {link.type === 'phone' && <Phone className="w-3 h-3" />}
+                                  {link.type === 'social' && <Instagram className="w-3 h-3" />}
+                                </div>
+                                <span className="text-sm font-medium flex-1">{link.title}</span>
+                                <ExternalLink className="w-3 h-3 opacity-50" />
                               </div>
-                              <span className="text-sm font-medium flex-1">{link.title}</span>
-                              <ExternalLink className="w-3 h-3 opacity-50" />
-                            </div>
-                          </button>
+                            </button>
+                          </ScrollAnimation>
                         ))}
                       </div>
                     )}
@@ -251,6 +297,7 @@ export default function AnimatedPreview({ business }: AnimatedPreviewProps) {
                     <div className="text-center mt-4 pt-3 border-t border-gray-200/30">
                       <p className="text-xs text-gray-400">Made with TapBook</p>
                     </div>
+                  </div>
                   </div>
                 </div>
               </div>

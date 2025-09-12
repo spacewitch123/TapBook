@@ -12,8 +12,7 @@ ALTER TABLE businesses ADD COLUMN IF NOT EXISTS theme JSONB DEFAULT '{
 
 ALTER TABLE businesses ADD COLUMN IF NOT EXISTS profile JSONB DEFAULT '{
   "avatar": null,
-  "bio": null,
-  "coverImage": null
+  "bio": null
 }'::jsonb;
 
 ALTER TABLE businesses ADD COLUMN IF NOT EXISTS links JSONB DEFAULT '[]'::jsonb;
@@ -36,8 +35,7 @@ UPDATE businesses SET
   }'::jsonb,
   profile = '{
     "avatar": null,
-    "bio": null,
-    "coverImage": null
+    "bio": null
   }'::jsonb,
   links = '[]'::jsonb,
   layout = '{

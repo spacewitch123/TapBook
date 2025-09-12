@@ -82,7 +82,13 @@ export default function EditPage({ params }: EditPageProps) {
           theme: updatedBusiness.theme,
           profile: updatedBusiness.profile,
           links: updatedBusiness.links,
-          layout: updatedBusiness.layout
+          layout: updatedBusiness.layout,
+          // New advanced features
+          custom_css: updatedBusiness.theme?.customCSS || null,
+          background_pattern: updatedBusiness.theme?.backgroundPattern || null,
+          custom_shadow: updatedBusiness.theme?.customShadow || null,
+          particle_effect: updatedBusiness.theme?.particleEffect || null,
+          filters: updatedBusiness.theme?.filters || null
         })
         .eq('slug', params.slug)
         .eq('edit_token', token);
@@ -133,8 +139,16 @@ export default function EditPage({ params }: EditPageProps) {
       // Ensure business has all required fields with defaults
       const businessData: Business = {
         ...data,
-        theme: data.theme || THEME_PRESETS.modern,
-        profile: data.profile || { avatar: null, bio: null, coverImage: null },
+        theme: {
+          ...(data.theme || THEME_PRESETS.modern),
+          // Load advanced features from separate columns
+          customCSS: data.custom_css || undefined,
+          backgroundPattern: data.background_pattern || undefined,
+          customShadow: data.custom_shadow || undefined,
+          particleEffect: data.particle_effect || undefined,
+          filters: data.filters || undefined
+        },
+        profile: data.profile || { avatar: null, bio: null },
         links: data.links || [],
         layout: data.layout || { showServices: true, servicesStyle: 'cards', linkOrder: [] }
       };

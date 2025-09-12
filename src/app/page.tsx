@@ -132,8 +132,7 @@ export default function HomePage() {
           theme: THEME_PRESETS.modern, // Default to modern theme
           profile: {
             avatar: formData.avatar,
-            bio: formData.bio.trim() || null,
-            coverImage: null
+            bio: formData.bio.trim() || null
           },
           links,
           layout: {

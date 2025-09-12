@@ -1,6 +1,5 @@
 node_modules
 .env.local
-supabase-schema.sql
 .supabase
 .next
 .vercel
