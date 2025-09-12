@@ -20,6 +20,9 @@ export interface Theme {
   textColor: string;
   buttonStyle: 'rounded' | 'pill' | 'square' | 'brutal' | 'ghost';
   font: 'inter' | 'outfit' | 'space-mono' | 'playfair' | 'caveat';
+  backdropStyle?: string;
+  animations?: boolean;
+  hoverEffects?: boolean;
 }
 
 export interface Profile {
