@@ -75,6 +75,13 @@ export default function AnimatedPreview({ business }: AnimatedPreviewProps) {
     return 'backdrop-blur';
   };
 
+  // Generate CSS filter string from theme filters
+  const generateFilterString = () => {
+    if (!theme.filters) return '';
+    const f = theme.filters;
+    return `blur(${f.blur}px) brightness(${f.brightness}%) contrast(${f.contrast}%) saturate(${f.saturate}%) hue-rotate(${f.hueRotate}deg) grayscale(${f.grayscale}%) sepia(${f.sepia}%) invert(${f.invert}%) opacity(${f.opacity}%)`;
+  };
+
   return (
     <div ref={previewRef} className="sticky top-6">
       <div className="bg-gradient-to-br from-slate-50 to-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden">
@@ -128,12 +135,20 @@ export default function AnimatedPreview({ business }: AnimatedPreviewProps) {
                 {/* Content */}
                 <div 
                   ref={contentRef}
-                  className={`h-full overflow-y-auto ${getBackgroundStyle(theme)} ${getFontClass(theme.font)} relative`}
+                  className={`h-full overflow-y-auto relative ${getFontClass(theme.font)}`}
                   style={{
-                    backgroundColor: theme.style === 'minimal' ? theme.backgroundColor : undefined,
+                    backgroundColor: theme.style === 'minimal' || theme.style === 'pastel' ? theme.backgroundColor : 
+                                   theme.style === 'dark' ? '#0f172a' :
+                                   theme.style === 'neon' ? '#0f0f23' : undefined,
+                    background: theme.style === 'gradient' ? `linear-gradient(135deg, ${theme.primaryColor}20, ${theme.primaryColor}40)` :
+                               theme.style === 'glass' ? `linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.2))` :
+                               undefined,
                     height: 'calc(100% - 3rem)',
-                    filter: theme.filters ? `blur(${theme.filters.blur}px) brightness(${theme.filters.brightness}%) contrast(${theme.filters.contrast}%) saturate(${theme.filters.saturate}%) hue-rotate(${theme.filters.hueRotate}deg) grayscale(${theme.filters.grayscale}%) sepia(${theme.filters.sepia}%) invert(${theme.filters.invert}%) opacity(${theme.filters.opacity}%)` : undefined,
-                    boxShadow: theme.customShadow || undefined
+                    filter: generateFilterString(),
+                    boxShadow: theme.customShadow || undefined,
+                    fontFamily: theme.font === 'caveat' ? 'Caveat, cursive' : 
+                               theme.font === 'playfair' ? 'Playfair Display, serif' :
+                               theme.font === 'space-mono' ? 'Space Mono, monospace' : undefined
                   }}
                 >
                   {/* Particle System */}
@@ -173,13 +188,16 @@ export default function AnimatedPreview({ business }: AnimatedPreviewProps) {
                             src={profile.avatar}
                             alt="Avatar"
                             className="w-16 h-16 rounded-full mx-auto border-3 border-white shadow-lg hover:scale-110 transition-transform duration-300"
+                            style={{
+                              borderColor: theme.style === 'dark' || theme.style === 'neon' ? theme.primaryColor : undefined
+                            }}
                           />
                         </div>
                       )}
 
                       <ScrollAnimation animation="slideUp" delay={0.2}>
                         <h1 
-                          className={`text-lg font-bold mb-2 ${getTextStyle(theme)}`}
+                          className={`text-lg font-bold mb-2`}
                           style={{ 
                             color: theme.textColor,
                             textShadow: theme.style === 'neon' ? `0 0 10px ${theme.primaryColor}` : undefined
@@ -192,7 +210,7 @@ export default function AnimatedPreview({ business }: AnimatedPreviewProps) {
                       {profile.bio && (
                         <ScrollAnimation animation="fadeIn" delay={0.4}>
                           <p 
-                            className={`text-xs opacity-75 mb-3 ${getTextStyle(theme)}`}
+                            className="text-xs opacity-75 mb-3"
                             style={{ color: theme.textColor }}
                           >
                             {profile.bio}
@@ -214,13 +232,22 @@ export default function AnimatedPreview({ business }: AnimatedPreviewProps) {
                           <ScrollAnimation key={link.id} animation="slideLeft" delay={index * 0.1}>
                             <button
                               onClick={handleLinkClick}
-                              className={`w-full p-3 text-left transition-all duration-300 hover:scale-105 hover:shadow-lg ${getButtonStyle(theme)} ${getBackdropClass(theme)}`}
+                              className={`w-full p-3 text-left transition-all duration-300 hover:scale-105 hover:shadow-lg ${
+                                theme.buttonStyle === 'pill' ? 'rounded-full' :
+                                theme.buttonStyle === 'square' ? 'rounded-none' :
+                                theme.buttonStyle === 'brutal' ? 'rounded-none border-2 border-black' :
+                                'rounded-lg'
+                              } ${getBackdropClass(theme)}`}
                               style={{
-                                backgroundColor: theme.backdropStyle && theme.backdropStyle !== 'none' ? 'rgba(255, 255, 255, 0.1)' : theme.primaryColor,
-                                color: theme.style === 'neon' ? theme.textColor : 'white',
-                                boxShadow: theme.style === 'neon' ? `0 0 20px ${theme.primaryColor}40` : theme.customShadow || undefined,
+                                backgroundColor: theme.backdropStyle && theme.backdropStyle !== 'none' ? 
+                                  (theme.style === 'glass' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)') : 
+                                  theme.primaryColor,
+                                color: theme.style === 'neon' || theme.style === 'dark' ? theme.textColor : 'white',
+                                boxShadow: theme.style === 'neon' ? `0 0 20px ${theme.primaryColor}40` : 
+                                          theme.customShadow || undefined,
                                 backdropFilter: getBackdropFilter(theme.backdropStyle),
-                                border: theme.backdropStyle === 'glass' ? '1px solid rgba(255, 255, 255, 0.2)' : undefined
+                                border: theme.backdropStyle === 'glass' ? '1px solid rgba(255, 255, 255, 0.2)' : 
+                                       theme.buttonStyle === 'brutal' ? '2px solid black' : undefined
                               }}
                             >
                               <div className="flex items-center gap-2">
@@ -243,7 +270,7 @@ export default function AnimatedPreview({ business }: AnimatedPreviewProps) {
                     {layout.showServices && services.length > 0 && (
                       <div className="space-y-3 mb-6">
                         <h2 
-                          className={`text-sm font-semibold text-center ${getTextStyle(theme)}`}
+                          className="text-sm font-semibold text-center"
                           style={{ color: theme.textColor }}
                         >
                           Services
@@ -253,21 +280,55 @@ export default function AnimatedPreview({ business }: AnimatedPreviewProps) {
                           {services.slice(0, 3).map((service, index) => (
                             <div
                               key={index}
-                              className="bg-white/80 backdrop-blur-sm rounded-lg p-3 shadow-sm border border-white/20 hover:shadow-md transition-all duration-300"
+                              className={`${
+                                layout.servicesStyle === 'minimal' 
+                                  ? 'flex justify-between items-center py-2 border-b border-opacity-20' 
+                                  : 'bg-white/80 backdrop-blur-sm rounded-lg p-3 shadow-sm border border-white/20 hover:shadow-md'
+                              } transition-all duration-300`}
+                              style={{
+                                borderColor: layout.servicesStyle === 'minimal' ? theme.textColor : undefined,
+                                backgroundColor: theme.style === 'glass' ? 'rgba(255,255,255,0.1)' : 
+                                               layout.servicesStyle === 'minimal' ? 'transparent' : undefined
+                              }}
                             >
-                              <div className="flex justify-between items-center">
-                                <h3 className="font-medium text-xs text-gray-800">{service.name}</h3>
-                                <span className="font-bold text-xs" style={{ color: theme.primaryColor }}>
+                              {service.image && layout.servicesStyle === 'cards' && (
+                                <img
+                                  src={service.image}
+                                  alt={service.name}
+                                  className="w-full h-16 object-cover rounded-md mb-2"
+                                />
+                              )}
+                              
+                              <div className={layout.servicesStyle === 'minimal' ? 'flex justify-between items-center w-full' : ''}>
+                                <h3 
+                                  className="font-medium text-xs"
+                                  style={{ color: theme.textColor }}
+                                >
+                                  {service.name}
+                                </h3>
+                                <span 
+                                  className="font-bold text-xs"
+                                  style={{ color: theme.primaryColor }}
+                                >
                                   {service.price}
                                 </span>
                               </div>
-                              <button
-                                onClick={handleLinkClick}
-                                className="w-full mt-2 py-1.5 px-3 text-xs rounded transition-all duration-300 hover:scale-105"
-                                style={{ backgroundColor: theme.primaryColor, color: 'white' }}
-                              >
-                                Book Now
-                              </button>
+                              
+                              {layout.servicesStyle !== 'minimal' && (
+                                <button
+                                  onClick={handleLinkClick}
+                                  className={`w-full mt-2 py-1.5 px-3 text-xs transition-all duration-300 hover:scale-105 ${
+                                    theme.buttonStyle === 'pill' ? 'rounded-full' :
+                                    theme.buttonStyle === 'square' ? 'rounded-none' : 'rounded'
+                                  }`}
+                                  style={{ 
+                                    backgroundColor: theme.primaryColor, 
+                                    color: theme.style === 'neon' || theme.style === 'dark' ? theme.textColor : 'white'
+                                  }}
+                                >
+                                  Book Now
+                                </button>
+                              )}
                             </div>
                           ))}
                         </div>
@@ -278,7 +339,10 @@ export default function AnimatedPreview({ business }: AnimatedPreviewProps) {
                     <div className="space-y-2">
                       <button
                         onClick={handleLinkClick}
-                        className="w-full py-2 px-3 text-xs font-medium rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                        className={`w-full py-2 px-3 text-xs font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg ${
+                          theme.buttonStyle === 'pill' ? 'rounded-full' :
+                          theme.buttonStyle === 'square' ? 'rounded-none' : 'rounded-lg'
+                        }`}
                         style={{ backgroundColor: '#25D366', color: 'white' }}
                       >
                         💬 WhatsApp
@@ -286,8 +350,14 @@ export default function AnimatedPreview({ business }: AnimatedPreviewProps) {
                       
                       <button
                         onClick={handleLinkClick}
-                        className="w-full py-2 px-3 text-xs font-medium rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg"
-                        style={{ backgroundColor: theme.textColor, color: theme.backgroundColor }}
+                        className={`w-full py-2 px-3 text-xs font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg ${
+                          theme.buttonStyle === 'pill' ? 'rounded-full' :
+                          theme.buttonStyle === 'square' ? 'rounded-none' : 'rounded-lg'
+                        }`}
+                        style={{ 
+                          backgroundColor: theme.textColor, 
+                          color: theme.backgroundColor === '#ffffff' ? '#000000' : '#ffffff'
+                        }}
                       >
                         📞 Call
                       </button>

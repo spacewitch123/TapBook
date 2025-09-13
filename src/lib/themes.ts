@@ -20,7 +20,7 @@ export const THEME_PRESETS: Record<string, Theme> = {
   sunset: {
     style: 'gradient',
     primaryColor: '#f59e0b',
-    backgroundColor: 'from-amber-400 via-orange-500 to-rose-500',
+    backgroundColor: '#fbbf24',
     textColor: '#ffffff',
     buttonStyle: 'pill',
     font: 'outfit'
@@ -28,7 +28,7 @@ export const THEME_PRESETS: Record<string, Theme> = {
   ocean: {
     style: 'gradient',
     primaryColor: '#0891b2',
-    backgroundColor: 'from-sky-400 via-cyan-500 to-blue-600',
+    backgroundColor: '#0ea5e9',
     textColor: '#ffffff',
     buttonStyle: 'pill',
     font: 'inter'
@@ -36,7 +36,7 @@ export const THEME_PRESETS: Record<string, Theme> = {
   glass: {
     style: 'glass',
     primaryColor: '#8b5cf6',
-    backgroundColor: 'from-violet-400/20 via-purple-400/20 to-indigo-400/20',
+    backgroundColor: '#f8fafc',
     textColor: '#1e293b',
     buttonStyle: 'rounded',
     font: 'inter'
@@ -52,7 +52,7 @@ export const THEME_PRESETS: Record<string, Theme> = {
   forest: {
     style: 'gradient',
     primaryColor: '#10b981',
-    backgroundColor: 'from-emerald-400 via-green-500 to-teal-600',
+    backgroundColor: '#059669',
     textColor: '#ffffff',
     buttonStyle: 'pill',
     font: 'outfit'
@@ -60,7 +60,7 @@ export const THEME_PRESETS: Record<string, Theme> = {
   rose: {
     style: 'gradient',
     primaryColor: '#ec4899',
-    backgroundColor: 'from-pink-400 via-rose-500 to-red-500',
+    backgroundColor: '#f43f5e',
     textColor: '#ffffff',
     buttonStyle: 'pill',
     font: 'caveat'

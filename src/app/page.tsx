@@ -269,7 +269,7 @@ export default function HomePage() {
                       <div className="mt-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
                         <p className="text-sm text-blue-700">
                           <span className="font-medium">Perfect!</span> We'll set up your page with the{' '}
-                          <span className="font-semibold">{THEME_PRESETS[BUSINESS_TYPES[formData.businessType].recommendedTheme].style}</span> theme 
+                          <span className="font-semibold">{BUSINESS_TYPES[formData.businessType].recommendedTheme}</span> theme 
                           that works great for {BUSINESS_TYPES[formData.businessType].name.toLowerCase()}.
                         </p>
                       </div>
